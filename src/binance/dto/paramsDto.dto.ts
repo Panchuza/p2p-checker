@@ -15,8 +15,12 @@ export class ParamsDto {
     @IsNotEmpty()
     asset: string
 
+    @IsString()
+    @IsNotEmpty()
+    publisherType: string
+
     @IsOptional()
-    payTypes: string[]
+    payTypes: string[] = []
 
     @IsNumber()
     @IsNotEmpty()

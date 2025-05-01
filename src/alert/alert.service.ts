@@ -12,6 +12,7 @@ export class AlertService {
       await axios.post(url, {
         chat_id: process.env.TELEGRAM_CHAT_ID,
         text: message,
+        parse_mode: 'Markdown',
       });
 
     } catch (error) {

@@ -7,13 +7,15 @@ import { P2pCheckerService } from './p2p-checker/p2p-checker.service';
 import { AlertService } from './alert/alert.service';
 import { BinanceService } from './binance/binance.service';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CronSchedulerService } from './common/helper/cron-scheduler';
 
 @Module({
   imports: [ConfigModule.forRoot({
-    isGlobal: true, // Permite que las variables estén disponibles globalmente
+    isGlobal: true,
     envFilePath: '.env'
   }), ScheduleModule.forRoot()],
   controllers: [AppController, P2pCheckerController],
-  providers: [AppService, P2pCheckerService, AlertService, BinanceService],
+  providers: [
+    AppService, P2pCheckerService, AlertService, BinanceService, CronSchedulerService],
 })
 export class AppModule {}

@@ -1,52 +1,98 @@
 import { Injectable } from '@nestjs/common';
 import { AlertService } from 'src/alert/alert.service';
-import { BinanceService } from 'src/binance/binance.service';
 import { ParamsDto } from 'src/binance/dto/paramsDto.dto';
 import { CommonException } from 'src/common/exception/common-exception.exception';
 
 @Injectable()
 export class P2pCheckerService {
-  private lastPrices: Record<string, number> = {}; 
+  private lastOrders: Record<string, {
+    price: number;
+    advertiser: string;
+    paymentMethods: string;
+  }> = {};
 
-  constructor(
-    private readonly binanceService: BinanceService,
-    private readonly alertService: AlertService,
-  ) {}
+  constructor(private readonly alertService: AlertService) {}
 
-  async checkP2POrders(paramsDto: ParamsDto) {
+  async checkP2POrders(responseFromBinance: any, paramsDto: ParamsDto) {
     try {
-
-      if (!this.lastPrices[paramsDto.fiat]) {
-        this.lastPrices[paramsDto.fiat] = Infinity;
+      const order = responseFromBinance?.responseFromBinance?.data?.[0];
+      if (!order) {
+        throw new CommonException('No se encontraron órdenes disponibles', 400);
       }
-
-      const orders = await this.binanceService.getP2POrders(paramsDto);
-    
-      if (orders.data && orders.data.length > 0) {
-        const currentPrice = parseFloat(orders.data[0].adv.price);
-        const currentPriceId: string = `${new Date()}-${currentPrice}`;
-        const newPriceId: string = `${new Date()}-${parseFloat(orders.data[0].adv.price)}`;
-
-        if (currentPrice < this.lastPrices[paramsDto.fiat] || currentPriceId !== newPriceId) {
-          const paymentMethods = orders.data[0].adv.tradeMethods
-            .map((method) => method.payType)
-            .join(', ');
-
-          await this.alertService.sendTelegramAlert(
-            `------------------Nueva Alerta--------------------\n` +
-            `Nueva orden P2P: ${currentPrice} ${paramsDto.asset}/${paramsDto.fiat}\n` +
-            `Generada por: ${orders.data[0].advertiser.nickName}\n` +
-            `Acepta los siguientes métodos de pago: ${paymentMethods}\n` +
-            `------------------Nueva Alerta--------------------`
-          );
-
-          this.lastPrices[paramsDto.fiat] = currentPrice;
-        }
-      } else {
-        throw new CommonException(`No se encontraron órdenes de ${paramsDto.fiat}.`, 400);
+  
+      const currentPrice = parseFloat(order.adv.price);
+      const asset = order.adv.asset;
+      const fiat = order.adv.fiatUnit;
+  
+      const jobKey = this.generateKey(fiat, asset, paramsDto);
+      const lastOrder = this.lastOrders[jobKey];
+  
+      if (!this.shouldNotify(order, lastOrder)) {
+        return this.formatResponse(order);
       }
+  
+      const paymentMethods = order.adv.tradeMethods.map(m => m.payType).join(', ');
+  
+      await this.alertService.sendTelegramAlert(
+        `📢 *Nueva orden P2P detectada*\n\n` +
+        `💸 Precio: *${currentPrice}* ${asset}/${fiat}\n` +
+        `💸 Cantidad Disponible: *${parseFloat(order.adv.surplusAmount).toFixed(2)}* *${asset}*\n` +
+        `💸 Rango: *${parseFloat(order.adv.minSingleTransAmount)}* - *${parseFloat(order.adv.maxSingleTransAmount)}* *${fiat}*\n` +
+        `👤 Usuario: *${order.advertiser.nickName}*\n` +
+        `💳 Métodos de pago: *${paymentMethods}*`
+      );
+  
+      this.lastOrders[jobKey] = {
+        price: currentPrice,
+        advertiser: order.advertiser.nickName,
+        paymentMethods,
+      };
+  
+      return this.formatResponse(order);
     } catch (error) {
-      throw new CommonException(`Ocurrió un error durante la operación. Error: ${error.message}`, 500);
+      throw new CommonException(
+        `Error en checkP2POrders: ${error.message}`,
+        error.status || 500
+      );
     }
+  }
+  
+
+  private generateKey(fiat: string, asset: string, paramsDto: ParamsDto): string {
+    return [
+      fiat,
+      paramsDto.tradeType,
+      asset,
+      paramsDto.payTypes?.join('-') ?? 'none',
+      paramsDto.additionalKycVerifyFilter ?? 'none',
+      paramsDto.publisherType ?? 'none',
+      paramsDto.cronExpression // importante para distinguir jobs paralelos
+    ].join('_');
+  }
+  
+
+  private shouldNotify(currentOrder: any, lastOrder?: any): boolean {
+    if (!lastOrder) return true;
+  
+    const currentPrice = parseFloat(currentOrder.adv.price);
+    const currentAdvertiser = currentOrder.advertiser.nickName;
+    const currentPaymentMethods = currentOrder.adv.tradeMethods.map(m => m.payType).join(', ');
+  
+    return (
+      currentPrice !== lastOrder.price ||
+      currentAdvertiser !== lastOrder.advertiser ||
+      currentPaymentMethods !== lastOrder.paymentMethods
+    );
+  }
+  
+
+  private formatResponse(order: any) {
+    return {
+      nickName: order.advertiser.nickName,
+      price: order.adv.price,
+      tradeMethods: order.adv.tradeMethods.map(m => m.payType),
+      asset: order.adv.asset,
+      fiat: order.adv.fiat,
+    };
   }
 }

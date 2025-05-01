@@ -8,6 +8,7 @@ export class BinanceService {
   async getP2POrders(paramsDto: ParamsDto): Promise<any> {
     
     try {
+      
       const response = await axios.post(
         'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search',
         {
@@ -18,6 +19,7 @@ export class BinanceService {
           asset: paramsDto.asset,
           payTypes: paramsDto.payTypes,
           additionalKycVerifyFilter: paramsDto.additionalKycVerifyFilter,
+          publisherType: paramsDto.publisherType
         },
         {
           headers: {
