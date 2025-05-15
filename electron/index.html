@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src http://localhost:3000" />
+  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="styles.css" rel="stylesheet" />
+  <title>P2P Checker</title>
+</head>
+
+<video autoplay muted loop id="bg-video">
+  <source src="./assets/ezgif-6112d3efb79f6f.mp4" type="video/mp4">
+</video>
+<body>
+  <div class="container">
+    <h1>P2P Checker</h1>
+    <h2>Configurar seguimiento de mercado</h2>
+
+    <label>
+      <input type="checkbox" id="onlyVerified"> Solo anuncios de comerciantes verificados
+    </label><br><br>
+
+    <div class="row">
+      <label>Fiat:
+        <select id="fiat">
+          <option>Peso Argentino</option>
+        </select>
+      </label>
+
+      <label>Criptoactivo:
+        <select id="crypto">
+          <option>USDT</option>
+        </select>
+      </label>
+
+      <label>Tipo de orden:
+        <select id="orderType">
+          <option>Compra</option>
+          <option>Venta</option>
+        </select>
+      </label>
+    </div>
+
+    <br>
+
+    <div class="payment-methods">
+      <p>Método de pago:</p>
+      <label><input type="checkbox"> Transferencia bancaria</label><br>
+      <label><input type="checkbox"> Mercado Pago</label><br>
+      <label><input type="checkbox"> Ualá</label><br>
+      <label><input type="checkbox"> Santander</label><br>
+      <label><input type="checkbox"> BBVA</label><br>
+    </div>
+
+    <br>
+
+    <label>Precio mínimo:
+      <input type="text" placeholder="Ej: 1000">
+    </label>
+
+    <label>Precio máximo:
+      <input type="text" placeholder="Ej: 1500">
+    </label>
+
+    <button>Generar seguimiento</button>
+  </div>
+</body>
+
+</html>

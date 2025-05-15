@@ -95,4 +95,9 @@ export class P2pCheckerService {
       fiat: order.adv.fiat,
     };
   }
+
+  getLastOrder(key: string) {
+    return this.lastOrders[key] || null;
+  }
+  
 }

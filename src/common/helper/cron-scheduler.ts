@@ -43,4 +43,12 @@ export class CronSchedulerService {
       await this.p2pCheckearService.checkP2POrders(responseFromBinance, paramsDto);
     });
   }
+
+  getActiveJobsData() {
+    return Object.keys(this.cronJobs).map((key) => {
+      const lastOrder = this.p2pCheckearService.getLastOrder(key);
+      return { key, ...lastOrder };
+    });
+  }
+  
 }

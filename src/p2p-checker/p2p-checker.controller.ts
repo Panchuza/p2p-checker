@@ -9,16 +9,23 @@ export class P2pCheckerController {
     private readonly p2pCheckerService: P2pCheckerService,
     private cronSchedulerService: CronSchedulerService
 
-  ) {}
+  ) { }
 
-  @Get()
+  @Get('getAlerts')
   async checkOrders(@Query() paramsDto: ParamsDto) {
     try {
-      
+
       return await this.cronSchedulerService.executeCron(paramsDto)
 
     } catch (error) {
       console.error('Error en el controlador de órdenes P2P:', error.message);
       return { success: false, message: error.message };
-    }  }
+    }
+  }
+
+  @Get('active')
+  getActiveJobs() {
+    return this.cronSchedulerService.getActiveJobsData();
+  }
+
 }
