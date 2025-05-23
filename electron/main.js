@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
+const axios = require('axios');
 
 let mainWindow;
 let backendReady = false;
@@ -38,6 +39,22 @@ function createWindow() {
 // IPC Handlers
 ipcMain.handle('get-backend-status', () => backendReady);
 
+ipcMain.handle('get-fiats', async () => {
+  const response = await axios.get('http://localhost:3000/p2pAlerts/fiat-list');
+  return response.data;
+});
+
+ipcMain.handle('get-config', async () => {
+  const response = await axios.get('http://localhost:3000/p2pAlerts/config');
+  
+  return response.data;
+});
+
+ipcMain.handle('get-methods', async () => {
+  const response = await axios.get('http://localhost:3000/p2pAlerts/filter-conditions?fiat=ARS');
+  
+  return response.data;
+});
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {

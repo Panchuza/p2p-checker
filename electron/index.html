@@ -3,18 +3,20 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src http://localhost:3000" />
-  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" /> 
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; connect-src http://localhost:3000; img-src 'self' data: http:;" />
+  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="styles.css" rel="stylesheet" />
   <title>P2P Checker</title>
 </head>
 
-<video autoplay muted loop id="bg-video">
-  <source src="./assets/ezgif-6112d3efb79f6f.mp4" type="video/mp4">
-</video>
 <body>
+  <video autoplay muted loop id="bg-video">
+    <source src="./assets/ezgif-6112d3efb79f6f.mp4" type="video/mp4">
+  </video>
+
   <div class="container">
     <h1>P2P Checker</h1>
     <h2>Configurar seguimiento de mercado</h2>
@@ -24,17 +26,38 @@
     </label><br><br>
 
     <div class="row">
-      <label>Fiat:
-        <select id="fiat">
-          <option>Peso Argentino</option>
-        </select>
-      </label>
+      <div class="custom-dropdown" id="fiat-dropdown">
+        <label>Moneda:
+          <div class="selected-option" id="selected-fiat">
+            Seleccionar moneda
+          </div>
+        </label>
+        <ul class="dropdown-options" id="fiat-options"></ul>
+      </div>
 
-      <label>Criptoactivo:
-        <select id="crypto">
-          <option>USDT</option>
-        </select>
-      </label>
+      <div class="row">
+        <div class="custom-dropdown" id="config-dropdown">
+          <label>Criptoactivo:
+            <div class="selected-option" id="selected-crypto">
+              Seleccionar moneda
+            </div>
+          </label>
+          <ul class="dropdown-options" id="crypto-options"></ul>
+        </div>
+
+      </div>
+
+      <div class="row">
+        <div class="custom-dropdown" id="methods-dropdown">
+          <label>Metodos de pago:
+            <div class="selected-option" id="selected-methods">
+              Seleccionar el metodo de pago
+            </div>
+          </label>
+          <ul class="dropdown-options" id="methods-options"></ul>
+        </div>
+
+      </div>
 
       <label>Tipo de orden:
         <select id="orderType">
@@ -45,15 +68,6 @@
     </div>
 
     <br>
-
-    <div class="payment-methods">
-      <p>Método de pago:</p>
-      <label><input type="checkbox"> Transferencia bancaria</label><br>
-      <label><input type="checkbox"> Mercado Pago</label><br>
-      <label><input type="checkbox"> Ualá</label><br>
-      <label><input type="checkbox"> Santander</label><br>
-      <label><input type="checkbox"> BBVA</label><br>
-    </div>
 
     <br>
 
@@ -67,6 +81,7 @@
 
     <button>Generar seguimiento</button>
   </div>
+  <script src="renderer.js"></script>
 </body>
 
 </html>
