@@ -14,13 +14,14 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #1f1b1c;
   color: #f4f4f4;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 20px 0;
 }
 
 /* Contenedor principal */
@@ -29,7 +30,7 @@ body {
   padding: 2.5rem 3rem;
   border-radius: 20px;
   box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
-  max-width: 700px;
+  max-width: 800px;
   width: 90%;
   animation: fadeInUp 0.6s ease-out;
 }
@@ -51,16 +52,20 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .row label {
   display: flex;
   flex-direction: column;
   font-size: 0.9rem;
+  flex: 1;
+  min-width: 200px;
 }
 
 /* Inputs y selects */
-input[type="text"], select {
+input[type="text"],
+select {
   padding: 0.5rem;
   margin-top: 0.3rem;
   border: none;
@@ -71,7 +76,8 @@ input[type="text"], select {
   transition: all 0.3s ease;
 }
 
-input[type="text"]:focus, select:focus {
+input[type="text"]:focus,
+select:focus {
   outline: none;
   background-color: #4a3d41;
   transform: scale(1.05);
@@ -93,11 +99,18 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s;
+  width: 100%;
 }
 
 button:hover {
   background: #00a37e;
-  transform: scale(1.05);
+  transform: scale(1.02);
+}
+
+button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Animación de entrada */
@@ -112,69 +125,97 @@ button:hover {
   }
 }
 
-/* Métodos de pago */
-.payment-methods p {
-  margin: 0.5rem 0;
-  font-weight: bold;
-}
-
-#fiat option {
-  padding-left: 25px;
-  background-repeat: no-repeat;
-  background-size: 20px 20px;
-  background-position: left center;
-}
-
-
+/* Custom Dropdowns */
 .custom-dropdown {
   position: relative;
   width: 100%;
-  height: 38px; /* Igual a tus selects */
   user-select: none;
   font-family: sans-serif;
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
 .selected-option {
   padding: 10px;
-  background-color: #2c2c2e;
+  background-color: #3c3336;
   color: #fff;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 8px;
+  margin-top: 0.3rem;
+  transition: all 0.3s ease;
+}
+
+.selected-option:hover {
+  background-color: #4a3d41;
+  transform: scale(1.02);
 }
 
 .selected-option img {
-  margin-right: 10px;
   width: 20px;
   height: 20px;
 }
 
+/* Input de búsqueda */
+.dropdown-search {
+  padding: 12px !important;
+  margin: 8px !important;
+  border: 1px solid #555 !important;
+  border-radius: 8px !important;
+  background-color: #2c2c2e !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  width: calc(100% - 16px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.dropdown-search:focus {
+  outline: none !important;
+  border-color: #00b894 !important;
+  background-color: #3c3336 !important;
+  box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.2) !important;
+}
+
+.dropdown-search::placeholder {
+  color: #999 !important;
+}
+
+/* Dropdown options container */
 .dropdown-options {
   position: absolute;
   top: 100%;
   left: 0;
   width: 100%;
-  max-height: 250px;
+  max-height: 350px;
   overflow-y: auto;
   background-color: #1e1e1f;
   color: #fff;
-  border-radius: 5px;
+  border-radius: 12px;
   margin-top: 5px;
-  z-index: 100;
+  z-index: 1000;
   display: none;
-  box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.4);
+  border: 1px solid #444;
+  list-style: none;
+  padding: 0;
 }
 
+/* Opciones normales del dropdown */
 .dropdown-options li {
-  padding: 10px;
+  padding: 12px;
   display: flex;
   align-items: center;
   cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-bottom: 1px solid #333;
+  list-style: none;
+}
+
+.dropdown-options li:last-child {
+  border-bottom: none;
 }
 
 .dropdown-options li img {
@@ -187,3 +228,202 @@ button:hover {
   background-color: #2c2c2e;
 }
 
+.dropdown-options li:first-child {
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.dropdown-options li:last-child {
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* 🚀 NUEVA ESTRUCTURA PARA MÉTODOS DE PAGO - MÁS SIMPLE */
+
+/* Botones de control */
+.control-buttons {
+  display: flex !important;
+  gap: 8px !important;
+  padding: 12px !important;
+  border-bottom: 2px solid #444 !important;
+  background-color: #252527 !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
+  list-style: none !important;
+  margin: 0 !important;
+  justify-content: center !important;
+}
+
+.control-button {
+  padding: 8px 16px !important;
+  background-color: #00b894 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex: 1 !important;
+  max-width: 120px !important;
+}
+
+.control-button:hover {
+  background-color: #00a37e !important;
+  transform: scale(1.02) !important;
+}
+
+.control-button.clear {
+  background-color: #e74c3c !important;
+}
+
+.control-button.clear:hover {
+  background-color: #c0392b !important;
+}
+
+/* 🚀 ESTRUCTURA COMPLETAMENTE NUEVA PARA MÉTODOS */
+.method-option {
+  padding: 0 !important;
+  margin: 0 !important;
+  border-bottom: 1px solid #333 !important;
+  list-style: none !important;
+  background-color: transparent !important;
+}
+
+.method-option:last-child {
+  border-bottom: none !important;
+}
+
+.method-option:hover {
+  background-color: #2a2a2c !important;
+}
+
+/* 🚀 FILA DEL MÉTODO - ESTRUCTURA SIMPLE */
+.method-row {
+  display: block !important;
+  padding: 14px 16px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.method-row:hover {
+  background-color: #2a2a2c !important;
+}
+
+/* 🚀 CHECKBOX - POSICIONADO ABSOLUTAMENTE A LA IZQUIERDA */
+.method-checkbox {
+  float: left !important;
+  margin: 0 12px 0 0 !important;
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #00b894 !important;
+  cursor: pointer !important;
+  position: relative !important;
+  top: 2px !important;
+}
+
+/* 🚀 TEXTO DEL MÉTODO - SIMPLE DISPLAY INLINE */
+.method-text {
+  display: inline !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #e0e0e0 !important;
+  cursor: pointer !important;
+  line-height: 1.4 !important;
+}
+
+.method-row:hover .method-text {
+  color: #fff !important;
+}
+
+/* 🚀 Estados de selección */
+.method-checkbox:checked + .method-text {
+  color: #00b894 !important;
+  font-weight: 600 !important;
+}
+
+.method-option:has(.method-checkbox:checked) {
+  background-color: rgba(0, 184, 148, 0.1) !important;
+}
+
+.method-option:has(.method-checkbox:checked):hover {
+  background-color: rgba(0, 184, 148, 0.15) !important;
+}
+
+.method-option:has(.method-checkbox:checked) .method-row {
+  background-color: rgba(0, 184, 148, 0.1) !important;
+}
+
+.method-option:has(.method-checkbox:checked):hover .method-row {
+  background-color: rgba(0, 184, 148, 0.15) !important;
+}
+
+/* Contador de métodos */
+.methods-counter {
+  background-color: #00b894;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+/* Sin resultados */
+.no-results {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  font-style: italic;
+  list-style: none;
+}
+
+/* Scrollbar personalizado */
+.dropdown-options::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dropdown-options::-webkit-scrollbar-track {
+  background: #1e1e1f;
+  border-radius: 4px;
+}
+
+.dropdown-options::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.dropdown-options::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
+
+  .row label {
+    min-width: unset;
+  }
+
+  .container {
+    padding: 1.5rem 2rem;
+  }
+
+  .method-row {
+    padding: 12px 14px !important;
+  }
+
+  .method-text {
+    font-size: 13px !important;
+  }
+
+  .control-buttons {
+    flex-direction: column !important;
+  }
+
+  .control-button {
+    max-width: none !important;
+  }
+}

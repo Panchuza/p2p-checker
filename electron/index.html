@@ -35,51 +35,48 @@
         <ul class="dropdown-options" id="fiat-options"></ul>
       </div>
 
-      <div class="row">
-        <div class="custom-dropdown" id="config-dropdown">
-          <label>Criptoactivo:
-            <div class="selected-option" id="selected-crypto">
-              Seleccionar moneda
-            </div>
-          </label>
-          <ul class="dropdown-options" id="crypto-options"></ul>
-        </div>
-
+      <div class="custom-dropdown" id="config-dropdown">
+        <label>Criptoactivo:
+          <div class="selected-option" id="selected-crypto">
+            Seleccionar criptoactivo
+          </div>
+        </label>
+        <ul class="dropdown-options" id="crypto-options"></ul>
       </div>
 
-      <div class="row">
-        <div class="custom-dropdown" id="methods-dropdown">
-          <label>Metodos de pago:
-            <div class="selected-option" id="selected-methods">
-              Seleccionar el metodo de pago
-            </div>
-          </label>
-          <ul class="dropdown-options" id="methods-options"></ul>
-        </div>
-
+      <div class="custom-dropdown" id="methods-dropdown">
+        <label>Métodos de pago:
+          <div class="selected-option" id="selected-methods">
+            Seleccionar método de pago (opcional)
+          </div>
+        </label>
+        <ul class="dropdown-options" id="methods-options"></ul>
       </div>
 
       <label>Tipo de orden:
         <select id="orderType">
-          <option>Compra</option>
-          <option>Venta</option>
+          <option value="Compra">Compra</option>
+          <option value="Venta">Venta</option>
         </select>
       </label>
     </div>
 
     <br>
 
+    <div class="row">
+      <div class="custom-dropdown" id="cron-dropdown">
+        <label>Frecuencia de revisión:
+          <div class="selected-option" id="selected-cron">
+            Cada 5 segundos
+          </div>
+        </label>
+        <ul class="dropdown-options" id="cron-options"></ul>
+      </div>
+    </div>
+
     <br>
 
-    <label>Precio mínimo:
-      <input type="text" placeholder="Ej: 1000">
-    </label>
-
-    <label>Precio máximo:
-      <input type="text" placeholder="Ej: 1500">
-    </label>
-
-    <button>Generar seguimiento</button>
+    <button id="generateButton">Generar seguimiento</button>
   </div>
   <script src="renderer.js"></script>
 </body>

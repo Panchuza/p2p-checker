@@ -64,8 +64,7 @@ export class P2pCheckerService {
       paramsDto.tradeType,
       asset,
       paramsDto.payTypes?.join('-') ?? 'none',
-      paramsDto.additionalKycVerifyFilter ?? 'none',
-      paramsDto.publisherType ?? 'none',
+      paramsDto.publisherType ?? 'merchant',
       paramsDto.cronExpression // importante para distinguir jobs paralelos
     ].join('_');
   }

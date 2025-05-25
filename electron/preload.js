@@ -1,13 +1,12 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer } = require("electron")
 
-contextBridge.exposeInMainWorld('electronAPI', {
+contextBridge.exposeInMainWorld("electronAPI", {
   onBackendReady: (callback) => {
-    ipcRenderer.on('backend-ready', callback);
+    ipcRenderer.on("backend-ready", callback)
   },
-  getBackendStatus: () => ipcRenderer.invoke('get-backend-status'),
-
-  // 🚀 Nuevo método para obtener la lista de fiats desde el backend
-  getFiats: () => ipcRenderer.invoke('get-fiats'),
-  getConfig: () => ipcRenderer.invoke('get-config'),
-  getMethods: () => ipcRenderer.invoke('get-methods')
-});
+  getBackendStatus: () => ipcRenderer.invoke("get-backend-status"),
+  getFiats: () => ipcRenderer.invoke("get-fiats"),
+  getConfig: () => ipcRenderer.invoke("get-config"),
+  getMethods: (fiat) => ipcRenderer.invoke("get-methods", fiat),
+  generateTracking: (params) => ipcRenderer.invoke("generate-tracking", params),
+})
