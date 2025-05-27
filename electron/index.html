@@ -1,84 +1,131 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; connect-src http://localhost:3000; img-src 'self' data: http:;" />
-  <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link href="styles.css" rel="stylesheet" />
+  <meta charset="UTF-8">
   <title>P2P Checker</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
   <video autoplay muted loop id="bg-video">
     <source src="./assets/ezgif-6112d3efb79f6f.mp4" type="video/mp4">
   </video>
 
-  <div class="container">
-    <h1>P2P Checker</h1>
-    <h2>Configurar seguimiento de mercado</h2>
-
-    <label>
-      <input type="checkbox" id="onlyVerified"> Solo anuncios de comerciantes verificados
-    </label><br><br>
-
-    <div class="row">
-      <div class="custom-dropdown" id="fiat-dropdown">
-        <label>Moneda:
-          <div class="selected-option" id="selected-fiat">
-            Seleccionar moneda
-          </div>
-        </label>
-        <ul class="dropdown-options" id="fiat-options"></ul>
-      </div>
-
-      <div class="custom-dropdown" id="config-dropdown">
-        <label>Criptoactivo:
-          <div class="selected-option" id="selected-crypto">
-            Seleccionar criptoactivo
-          </div>
-        </label>
-        <ul class="dropdown-options" id="crypto-options"></ul>
-      </div>
-
-      <div class="custom-dropdown" id="methods-dropdown">
-        <label>Métodos de pago:
-          <div class="selected-option" id="selected-methods">
-            Seleccionar método de pago (opcional)
-          </div>
-        </label>
-        <ul class="dropdown-options" id="methods-options"></ul>
-      </div>
-
-      <label>Tipo de orden:
-        <select id="orderType">
-          <option value="Compra">Compra</option>
-          <option value="Venta">Venta</option>
-        </select>
-      </label>
+  <div class="main-container">
+    <!-- Navegación de tabs -->
+    <div class="tab-navigation">
+      <button class="tab-button active" data-tab="config">📊 Configuración</button>
+      <button class="tab-button" data-tab="history">📈 Historial de Precios</button>
+      <button class="tab-button" data-tab="jobs">⚡ Jobs Activos</button>
     </div>
 
-    <br>
+    <!-- Contenido de los tabs -->
+    <div class="tab-content">
+      <!-- Tab de Configuración -->
+      <div class="tab-panel active" id="config-panel">
+        <div class="container">
+          <h1>P2P Checker</h1>
+          <h2>Configurar seguimiento de mercado</h2>
 
-    <div class="row">
-      <div class="custom-dropdown" id="cron-dropdown">
-        <label>Frecuencia de revisión:
-          <div class="selected-option" id="selected-cron">
-            Cada 5 segundos
+          <label>
+            <input type="checkbox" id="onlyVerified"> Solo anuncios de comerciantes verificados
+          </label><br><br>
+
+          <div class="row">
+            <div class="custom-dropdown" id="fiat-dropdown">
+              <label>Moneda:
+                <div class="selected-option" id="selected-fiat">
+                  Seleccionar moneda
+                </div>
+              </label>
+              <ul class="dropdown-options" id="fiat-options"></ul>
+            </div>
+
+            <div class="custom-dropdown" id="config-dropdown">
+              <label>Criptoactivo:
+                <div class="selected-option" id="selected-crypto">
+                  Seleccionar criptoactivo
+                </div>
+              </label>
+              <ul class="dropdown-options" id="crypto-options"></ul>
+            </div>
+
+            <div class="custom-dropdown" id="methods-dropdown">
+              <label>Métodos de pago:
+                <div class="selected-option" id="selected-methods">
+                  Seleccionar método de pago (opcional)
+                </div>
+              </label>
+              <ul class="dropdown-options" id="methods-options"></ul>
+            </div>
+
+            <label>Tipo de orden:
+              <select id="orderType">
+                <option value="Compra">Compra</option>
+                <option value="Venta">Venta</option>
+              </select>
+            </label>
           </div>
-        </label>
-        <ul class="dropdown-options" id="cron-options"></ul>
+
+          <br>
+
+          <div class="row">
+            <div class="custom-dropdown" id="cron-dropdown">
+              <label>Frecuencia de revisión:
+                <div class="selected-option" id="selected-cron">
+                  Cada 5 segundos
+                </div>
+              </label>
+              <ul class="dropdown-options" id="cron-options"></ul>
+            </div>
+          </div>
+
+          <br>
+
+          <button id="generateButton">Generar seguimiento</button>
+        </div>
+      </div>
+
+      <!-- Tab de Historial de Precios -->
+      <div class="tab-panel" id="history-panel">
+        <div class="container">
+          <h1>📈 Historial de Precios</h1>
+          <h2>Últimos precios detectados</h2>
+          
+          <div class="history-controls">
+            <button id="clearHistoryButton" class="control-button clear">🗑️ Limpiar Historial</button>
+            <button id="refreshHistoryButton" class="control-button">🔄 Actualizar</button>
+          </div>
+
+          <div id="priceHistoryContainer">
+            <div class="no-history">
+              <p>📊 No hay precios registrados aún</p>
+              <p>Inicia un seguimiento en la pestaña de Configuración para comenzar a ver el historial.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab de Jobs Activos -->
+      <div class="tab-panel" id="jobs-panel">
+        <div class="container">
+          <h1>⚡ Jobs Activos</h1>
+          <h2>Seguimientos en ejecución</h2>
+          
+          <div class="jobs-controls">
+            <button id="refreshJobsButton" class="control-button">🔄 Actualizar</button>
+          </div>
+
+          <div id="activeJobsContainer">
+            <div class="no-jobs">
+              <p>⚡ No hay jobs activos</p>
+              <p>Configura un seguimiento en la pestaña de Configuración para ver los jobs activos aquí.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <br>
-
-    <button id="generateButton">Generar seguimiento</button>
   </div>
+  
   <script src="renderer.js"></script>
 </body>
-
 </html>

@@ -53,7 +53,6 @@ ipcMain.handle("get-methods", async (event, fiat = "ARS") => {
   return response.data
 })
 
-// 🚀 Nuevo handler para generar seguimiento
 ipcMain.handle("generate-tracking", async (event, params) => {
   try {
     const response = await axios.get("http://localhost:3000/p2pAlerts/getAlerts", {
@@ -62,6 +61,36 @@ ipcMain.handle("generate-tracking", async (event, params) => {
     return response.data
   } catch (error) {
     console.error("Error al generar seguimiento:", error)
+    throw error
+  }
+})
+
+ipcMain.handle("get-active-jobs", async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/p2pAlerts/active")
+    return response.data
+  } catch (error) {
+    console.error("Error al obtener jobs activos:", error)
+    throw error
+  }
+})
+
+ipcMain.handle("get-price-history", async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/p2pAlerts/price-history")
+    return response.data
+  } catch (error) {
+    console.error("Error al obtener historial de precios:", error)
+    throw error
+  }
+})
+
+ipcMain.handle("clear-price-history", async () => {
+  try {
+    const response = await axios.delete("http://localhost:3000/p2pAlerts/price-history")
+    return response.data
+  } catch (error) {
+    console.error("Error al limpiar historial de precios:", error)
     throw error
   }
 })

@@ -8,7 +8,11 @@ export class BinanceService {
   async getP2POrders(paramsDto: ParamsDto): Promise<any> {
 
     try {
-
+      const classif = [
+        "mass",
+        "profession",
+        "fiat_trade"
+      ]
       const response = await axios.post(
         'https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search',
         {
@@ -19,7 +23,10 @@ export class BinanceService {
           asset: paramsDto.asset,
           payTypes: paramsDto.payTypes,
           additionalKycVerifyFilter: paramsDto.additionalKycVerifyFilter,
-          publisherType: paramsDto.publisherType
+          publisherType: paramsDto.publisherType,
+          classifies: classif,
+          shieldMerchantAds: false,
+          proMerchantAds: false
         },
         {
           headers: {
@@ -77,11 +84,6 @@ export class BinanceService {
         'https://p2p.binance.com/bapi/c2c/v2/public/c2c/adv/filter-conditions', //Sacar del tradeMethods lo metodos de pago y si se quiere el periodo de pago desde periods
         {
           fiat: paramsDto.fiat,
-          "classifies": [
-            "mass",
-            "profession",
-            "fiat_trade"
-          ]
         },
         {
           headers: {
@@ -104,7 +106,7 @@ export class BinanceService {
     }
   }
 
-  async getConfig(paramsDto: ParamsDto): Promise<any> { 
+  async getConfig(paramsDto: ParamsDto): Promise<any> {
     try {
 
       const response = await axios.post(
