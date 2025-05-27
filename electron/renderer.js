@@ -84,7 +84,65 @@ async function loadPriceHistory() {
   }
 }
 
-// 🚀 Funciones para cargar jobs activos
+// 🚀 Función COMPLETAMENTE CORREGIDA para parsear la key del job
+function parseJobKey(jobKey) {
+  console.log("Parseando job key:", jobKey)
+
+  // La key ahora usa | como separador principal
+  const parts = jobKey.split("|")
+
+  if (parts.length >= 6) {
+    const fiat = parts[0]
+    const tradeType = parts[1]
+    const asset = parts[2]
+    const payTypes = parts[3]
+    const publisherType = parts[4]
+
+    // Decodificar la expresión cron
+    const cronExpressionEncoded = parts[5]
+    const cronExpression = cronExpressionEncoded.replace(/_SPACE_/g, " ").replace(/_ASTERISK_/g, "*")
+
+    console.log("Parsed data:", { fiat, tradeType, asset, payTypes, publisherType, cronExpression })
+
+    return {
+      fiat,
+      tradeType,
+      asset,
+      payTypes,
+      publisherType,
+      cronExpression,
+    }
+  }
+
+  // Fallback para formato anterior (usando _)
+  const legacyParts = jobKey.split("_")
+  console.log("Using legacy parsing for:", legacyParts)
+
+  return {
+    fiat: legacyParts[0] || "N/A",
+    tradeType: legacyParts[1] || "N/A",
+    asset: legacyParts[2] || "N/A",
+    payTypes: legacyParts[3] || "none",
+    publisherType: legacyParts[4] || "none",
+    cronExpression: legacyParts.slice(5).join(" ") || "N/A",
+  }
+}
+
+// 🚀 Función para traducir el tipo de comerciante
+function translatePublisherType(publisherType) {
+  switch (publisherType) {
+    case "merchant":
+      return "Verificados"
+    case "none":
+    case null:
+    case undefined:
+      return "Todos"
+    default:
+      return "Todos"
+  }
+}
+
+// 🚀 Funciones para cargar jobs activos - COMPLETAMENTE CORREGIDA
 async function loadActiveJobs() {
   const container = document.getElementById("activeJobsContainer")
 
@@ -92,6 +150,7 @@ async function loadActiveJobs() {
     container.innerHTML = '<div class="loading">🔄 Cargando jobs activos...</div>'
 
     const jobs = await window.electronAPI.getActiveJobs()
+    console.log("Jobs recibidos:", jobs)
 
     if (!jobs || jobs.length === 0) {
       container.innerHTML = `
@@ -105,39 +164,40 @@ async function loadActiveJobs() {
 
     container.innerHTML = jobs
       .map((job) => {
-        const parts = job.key.split("_")
-        const [fiat, tradeType, asset, payTypes, publisherType, cronExpression] = parts
+        // 🚀 Usar la nueva función de parsing
+        const jobData = parseJobKey(job.key)
+        console.log("Job data parsed:", jobData)
 
         return `
         <div class="job-item">
           <div class="job-header">
-            <div class="job-title">📊 ${asset}/${fiat} - ${tradeType === "BUY" ? "Compra" : "Venta"}</div>
+            <div class="job-title">📊 ${jobData.asset}/${jobData.fiat} - ${jobData.tradeType === "BUY" ? "Compra" : "Venta"}</div>
             <div class="job-status">🟢 ACTIVO</div>
           </div>
           <div class="job-details">
             <div class="job-detail">
-              <strong>💰 Criptoactivo:</strong> ${asset}
+              <strong>💰 Criptoactivo:</strong> ${jobData.asset}
             </div>
             <div class="job-detail">
-              <strong>💵 Moneda:</strong> ${fiat}
+              <strong>💵 Moneda:</strong> ${jobData.fiat}
             </div>
             <div class="job-detail">
-              <strong>📈 Tipo:</strong> ${tradeType === "BUY" ? "Compra" : "Venta"}
+              <strong>📈 Tipo:</strong> ${jobData.tradeType === "BUY" ? "Compra" : "Venta"}
             </div>
             <div class="job-detail">
-              <strong>👨‍💼 Comerciantes:</strong> ${publisherType === "merchant" ? "Solo verificados" : "Todos"}
+              <strong>👨‍💼 Comerciantes:</strong> ${translatePublisherType(jobData.publisherType)}
             </div>
             <div class="job-detail">
-              <strong>💳 Métodos de pago:</strong> ${payTypes === "none" ? "Todos" : payTypes.replace(/-/g, ", ")}
+              <strong>💳 Métodos de pago:</strong> ${jobData.payTypes === "none" ? "Todos" : jobData.payTypes.replace(/-/g, ", ")}
             </div>
             <div class="job-detail">
-              <strong>⏰ Frecuencia:</strong> ${formatCronExpression(cronExpression)}
+              <strong>⏰ Frecuencia:</strong> ${formatCronExpression(jobData.cronExpression)}
             </div>
             ${
               job.price
                 ? `
               <div class="job-detail">
-                <strong>💸 Último precio:</strong> ${job.price} ${fiat}
+                <strong>💸 Último precio:</strong> ${job.price} ${jobData.fiat}
               </div>
               <div class="job-detail">
                 <strong>👤 Último usuario:</strong> ${job.advertiser}
@@ -145,9 +205,6 @@ async function loadActiveJobs() {
             `
                 : ""
             }
-          </div>
-          <div class="job-key">
-            🔑 Key: ${job.key}
           </div>
         </div>
       `
@@ -177,7 +234,16 @@ function formatTimestamp(timestamp) {
   })
 }
 
+// 🚀 Función MEJORADA para formatear expresiones cron
 function formatCronExpression(cronExpr) {
+  if (!cronExpr || cronExpr === "N/A") {
+    return "Frecuencia desconocida"
+  }
+
+  // Limpiar la expresión cron de posibles caracteres extra
+  const cleanCronExpr = cronExpr.trim()
+  console.log("Formateando cron expression:", cleanCronExpr)
+
   const cronMap = {
     "*/5 * * * * *": "Cada 5 segundos",
     "*/10 * * * * *": "Cada 10 segundos",
@@ -190,7 +256,42 @@ function formatCronExpression(cronExpr) {
     "0 */30 * * * *": "Cada 30 minutos",
     "0 0 * * * *": "Cada hora",
   }
-  return cronMap[cronExpr] || cronExpr
+
+  // Buscar coincidencia exacta primero
+  if (cronMap[cleanCronExpr]) {
+    console.log("Encontrada coincidencia exacta:", cronMap[cleanCronExpr])
+    return cronMap[cleanCronExpr]
+  }
+
+  // Si no encuentra coincidencia exacta, intentar parsear manualmente
+  const parts = cleanCronExpr.split(" ")
+  console.log("Partes del cron:", parts)
+
+  if (parts.length === 6) {
+    const [seconds, minutes, hours, dayOfMonth, month, dayOfWeek] = parts
+
+    // Casos comunes de segundos
+    if (seconds.startsWith("*/") && minutes === "*" && hours === "*") {
+      const interval = seconds.substring(2)
+      return `Cada ${interval} segundos`
+    }
+
+    // Casos comunes de minutos
+    if (seconds === "0" && minutes.startsWith("*/") && hours === "*") {
+      const interval = minutes.substring(2)
+      return `Cada ${interval} minutos`
+    }
+
+    // Casos comunes de horas
+    if (seconds === "0" && minutes === "0" && hours.startsWith("*/")) {
+      const interval = hours.substring(2)
+      return `Cada ${interval} horas`
+    }
+  }
+
+  // Si no puede parsear, devolver la expresión original
+  console.log("No se pudo parsear, devolviendo original:", cleanCronExpr)
+  return cleanCronExpr
 }
 
 // 🚀 Event listeners para los botones de control
