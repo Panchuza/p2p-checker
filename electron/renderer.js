@@ -33,6 +33,7 @@ async function loadPriceHistory() {
     container.innerHTML = '<div class="loading">🔄 Cargando historial...</div>'
 
     const history = await window.electronAPI.getPriceHistory()
+    const methods = await window.electronAPI.getMethods("ARS")
 
     if (!history || history.length === 0) {
       container.innerHTML = `
@@ -45,8 +46,12 @@ async function loadPriceHistory() {
     }
 
     container.innerHTML = history
-      .map(
-        (item) => `
+      .map((item) =>{
+          currentMethodsData = methods.responseFromBinance.data.tradeMethods
+            .map((method) => {
+              return method.tradeMethodName
+            })
+          return  `
       <div class="price-history-item">
         <div class="price-header">
           <div class="price-main">💸 ${item.price} ${item.asset}/${item.fiat}</div>
@@ -67,11 +72,10 @@ async function loadPriceHistory() {
           </div>
         </div>
         <div class="price-methods">
-          <strong>💳 Métodos de pago:</strong> ${item.paymentMethods}
+          <strong>💳 Métodos de pago:</strong> ${currentMethodsData}
         </div>
       </div>
-    `,
-      )
+    `})
       .join("")
   } catch (error) {
     console.error("Error al cargar historial:", error)
@@ -86,7 +90,6 @@ async function loadPriceHistory() {
 
 // 🚀 Función COMPLETAMENTE CORREGIDA para parsear la key del job
 function parseJobKey(jobKey) {
-  console.log("Parseando job key:", jobKey)
 
   // La key ahora usa | como separador principal
   const parts = jobKey.split("|")
@@ -102,7 +105,6 @@ function parseJobKey(jobKey) {
     const cronExpressionEncoded = parts[5]
     const cronExpression = cronExpressionEncoded.replace(/_SPACE_/g, " ").replace(/_ASTERISK_/g, "*")
 
-    console.log("Parsed data:", { fiat, tradeType, asset, payTypes, publisherType, cronExpression })
 
     return {
       fiat,
@@ -116,7 +118,6 @@ function parseJobKey(jobKey) {
 
   // Fallback para formato anterior (usando _)
   const legacyParts = jobKey.split("_")
-  console.log("Using legacy parsing for:", legacyParts)
 
   return {
     fiat: legacyParts[0] || "N/A",
@@ -150,14 +151,17 @@ async function loadActiveJobs() {
     container.innerHTML = '<div class="loading">🔄 Cargando jobs activos...</div>'
 
     const jobs = await window.electronAPI.getActiveJobs()
-    console.log("Jobs recibidos:", jobs)
+    const methods = await window.electronAPI.getMethods("ARS")
+
+    // Mapear los datos para incluir tanto identifier como tradeMethodName
+
 
     if (!jobs || jobs.length === 0) {
       container.innerHTML = `
-        <div class="no-jobs">
-          <p>⚡ No hay jobs activos</p>
-          <p>Configura un seguimiento en la pestaña de Configuración para ver los jobs activos aquí.</p>
-        </div>
+      <div class="no-jobs">
+      <p>⚡ No hay jobs activos</p>
+      <p>Configura un seguimiento en la pestaña de Configuración para ver los jobs activos aquí.</p>
+      </div>
       `
       return
     }
@@ -166,7 +170,10 @@ async function loadActiveJobs() {
       .map((job) => {
         // 🚀 Usar la nueva función de parsing
         const jobData = parseJobKey(job.key)
-        console.log("Job data parsed:", jobData)
+        currentMethodsData = methods.responseFromBinance.data.tradeMethods
+          .map((method) => {
+            return method.tradeMethodName
+          })
 
         return `
         <div class="job-item">
@@ -188,14 +195,13 @@ async function loadActiveJobs() {
               <strong>👨‍💼 Comerciantes:</strong> ${translatePublisherType(jobData.publisherType)}
             </div>
             <div class="job-detail">
-              <strong>💳 Métodos de pago:</strong> ${jobData.payTypes === "none" ? "Todos" : jobData.payTypes.replace(/-/g, ", ")}
+              <strong>💳 Métodos de pago:</strong>${currentMethodsData}
             </div>
             <div class="job-detail">
               <strong>⏰ Frecuencia:</strong> ${formatCronExpression(jobData.cronExpression)}
             </div>
-            ${
-              job.price
-                ? `
+            ${job.price
+            ? `
               <div class="job-detail">
                 <strong>💸 Último precio:</strong> ${job.price} ${jobData.fiat}
               </div>
@@ -203,8 +209,8 @@ async function loadActiveJobs() {
                 <strong>👤 Último usuario:</strong> ${job.advertiser}
               </div>
             `
-                : ""
-            }
+            : ""
+          }
           </div>
         </div>
       `
@@ -242,7 +248,6 @@ function formatCronExpression(cronExpr) {
 
   // Limpiar la expresión cron de posibles caracteres extra
   const cleanCronExpr = cronExpr.trim()
-  console.log("Formateando cron expression:", cleanCronExpr)
 
   const cronMap = {
     "*/5 * * * * *": "Cada 5 segundos",
@@ -259,13 +264,11 @@ function formatCronExpression(cronExpr) {
 
   // Buscar coincidencia exacta primero
   if (cronMap[cleanCronExpr]) {
-    console.log("Encontrada coincidencia exacta:", cronMap[cleanCronExpr])
     return cronMap[cleanCronExpr]
   }
 
   // Si no encuentra coincidencia exacta, intentar parsear manualmente
   const parts = cleanCronExpr.split(" ")
-  console.log("Partes del cron:", parts)
 
   if (parts.length === 6) {
     const [seconds, minutes, hours, dayOfMonth, month, dayOfWeek] = parts
@@ -290,7 +293,6 @@ function formatCronExpression(cronExpr) {
   }
 
   // Si no puede parsear, devolver la expresión original
-  console.log("No se pudo parsear, devolviendo original:", cleanCronExpr)
   return cleanCronExpr
 }
 
@@ -372,7 +374,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         cronSelected.dataset.value = config.expression
         cronSelected.classList.remove("active")
         userSelections.cronExpression = config.expression
-        console.log("Cron seleccionado:", config.description, "->", config.expression)
       })
       cronOptionsList.appendChild(li)
     })
@@ -530,12 +531,10 @@ window.addEventListener("DOMContentLoaded", async () => {
   // 🚀 Event listeners para capturar cambios en los inputs
   orderTypeSelect.addEventListener("change", (e) => {
     userSelections.orderType = e.target.value
-    console.log("Tipo de orden seleccionado:", userSelections.orderType)
   })
 
   onlyVerifiedCheckbox.addEventListener("change", (e) => {
     userSelections.onlyVerified = e.target.checked
-    console.log("Solo verificados:", userSelections.onlyVerified)
   })
 
   // 🚀 Event listener para el botón "Generar seguimiento"
@@ -561,7 +560,6 @@ window.addEventListener("DOMContentLoaded", async () => {
         cronExpression: userSelections.cronExpression,
       }
 
-      console.log("Enviando parámetros:", params)
 
       // Deshabilitar botón mientras se procesa
       generateButton.disabled = true
@@ -570,7 +568,6 @@ window.addEventListener("DOMContentLoaded", async () => {
       // Llamar al método getAlerts
       const result = await window.electronAPI.generateTracking(params)
 
-      console.log("Resultado del seguimiento:", result)
       alert("Seguimiento generado exitosamente!")
     } catch (error) {
       console.error("Error al generar seguimiento:", error)
@@ -621,7 +618,6 @@ function selectAllMethods() {
   userSelections.paymentMethods = [...currentMethodsData.map((method) => method.identifier)]
   updateSelectedMethodsDisplay()
   updateCheckboxStates()
-  console.log("Todos los métodos seleccionados:", userSelections.paymentMethods)
 }
 
 // 🚀 Función para limpiar todas las selecciones
@@ -629,7 +625,6 @@ function clearAllMethods() {
   userSelections.paymentMethods = []
   updateSelectedMethodsDisplay()
   updateCheckboxStates()
-  console.log("Métodos limpiados:", userSelections.paymentMethods)
 }
 
 // 🚀 Función para actualizar el estado de los checkboxes
@@ -697,7 +692,6 @@ function createMethodOption(method, isChecked = false) {
     }
 
     updateSelectedMethodsDisplay()
-    console.log("Métodos de pago seleccionados:", userSelections.paymentMethods)
   })
 
   // Event listener para toda la fila (para hacer clic en cualquier parte)
@@ -723,7 +717,6 @@ function showNoResults(container) {
 // 🚀 Función para cargar métodos de pago basado en fiat seleccionado
 async function loadPaymentMethods(fiat = "ARS") {
   try {
-    console.log("Cargando métodos de pago para:", fiat)
     const methods = await window.electronAPI.getMethods(fiat)
 
     // Mapear los datos para incluir tanto identifier como tradeMethodName
@@ -754,7 +747,6 @@ async function loadPaymentMethods(fiat = "ARS") {
       methodsOptionsList.appendChild(li)
     })
 
-    console.log("Métodos de pago cargados:", currentMethodsData.length)
   } catch (error) {
     console.error("Error al cargar métodos de pago:", error)
     const methodsOptionsList = document.getElementById("methods-options")
@@ -819,13 +811,11 @@ function createSearchableDropdown(containerId, selectedId, optionsId, data, disp
         // Guardar selección según el tipo de dropdown
         if (containerId === "fiat-dropdown") {
           userSelections.fiat = item[valueKey]
-          console.log("Fiat seleccionado:", userSelections.fiat)
 
           // 🚀 Cargar métodos de pago cuando cambie el fiat
           loadPaymentMethods(userSelections.fiat)
         } else if (containerId === "config-dropdown") {
           userSelections.crypto = item[valueKey]
-          console.log("Crypto seleccionado:", userSelections.crypto)
         }
       })
       optionsList.appendChild(li)
